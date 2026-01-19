@@ -6,13 +6,13 @@ from flasgger import Swagger
 #from functools import wraps
 
 # Configuration des variables d'environnement
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-REDIS_DB = int(os.getenv("REDIS_DB", 0))
-APP_PORT = int(os.getenv("APP_PORT", 5000))
-ADMIN_KEY = os.getenv("ADMIN_KEY", "default_key")
-CSV_FILE_USERS = os.getenv("CSV_FILE", "initial_data_users.csv")
-CSV_FILE_QUOTES = os.getenv("CSV_FILE", "initial_data_quotes.csv")
+REDIS_HOST = "redis"
+REDIS_PORT =  6379
+REDIS_DB = 0
+APP_PORT = 5000
+ADMIN_KEY = "default_key"
+CSV_FILE_USERS = "../BDD_microservice/initial_data_users.csv"
+CSV_FILE_QUOTES = "../BDD_microservice/initial_data_quotes.csv"
 
 # Initialisation de Flask et Swagger
 app = Flask(__name__)
@@ -52,63 +52,82 @@ if not redis_client.exists("quotes:1"):
                redis_client.hset(f"quotes:{quote_id}", mapping={"quote": quote})
                redis_client.sadd("quotes",f"quotes:{quote_id}")
 
-# Endpoint: Service des utilisateurs
-@app.route('/users', methods=['GET'])
-@require_auth
-def get_users():
+# Endpoint: Service des citations
+@app.route('/quotes', methods=['GET'])
+def get_quotes():
     """
-    Récupérer la liste des utilisateurs
+    Récupérer toutes les citations
     ---
     security:
       - APIKeyAuth: []
     responses:
       200:
-        description: Liste des utilisateurs
+        description: Liste des citations
     """
-    users_ids = redis_client.smembers("users")
-    users=[]
-    for user_id in users_ids:
-        users.append(redis_client.hgetall(user_id))
-    print(users)
-    return jsonify(users), 200
+    quotes = redis_client.smembers("quotes")
+    quote_list=[]
+    for quote in quotes:
+        quote_list.append(redis_client.hgetall(quote))
+    return jsonify(quote_list), 200
 
-@app.route('/users', methods=['POST'])
+@app.route('/quotes', methods=['POST'])
 @require_auth
-def add_user():
+def add_quote():
     """
-    Ajouter un utilisateur
+    Ajouter une citation
     ---
     security:
       - APIKeyAuth: []
     parameters:
-      - name: user
+      - name: quote
         in: body
         required: true
         schema:
           type: object
           properties:
-            id:
+            user_id:
               type: string
-            name:
-              type: string
-            password:
+            quote:
               type: string
     responses:
       201:
-        description: Utilisateur ajouté
+        description: Citation ajoutée
     """
     data = request.get_json()
-    user_id = data.get("id")
-    name = data.get("name")
-    password = data.get("password")
+    user_id = data.get("user_id")
+    quote = data.get("quote")
 
-    if not user_id or not name:
-        return jsonify({"error": "ID et nom sont requis"}), 400
+    if not user_id or not quote:
+        return jsonify({"error": "user_id et quote sont requis"}), 400
 
-    redis_client.hset(f"users:{user_id}", mapping={"id": user_id,"name": name, "password": password})
-    redis_client.sadd("users",f"users:{user_id}")
-    return jsonify({"message": "Utilisateur ajouté"}), 201
+    quote_id = redis_client.incr("quote_id")
+    redis_client.hset("quotes", quote_id, str({"user_id": user_id, "quote": quote}))
+    return jsonify({"message": "Citation ajoutée", "id": quote_id}), 201
 
+@app.route('/quotes/<int:quote_id>', methods=['DELETE'])
+@require_auth
+def delete_quote(quote_id):
+    """
+    Supprimer une citation par ID
+    ---
+    security:
+      - APIKeyAuth: []
+    parameters:
+      - name: quote_id
+        in: path
+        required: true
+        type: integer
+    responses:
+      200:
+        description: Citation supprimée
+      404:
+        description: Citation non trouvée
+    """
+    if not redis_client.hexists(f"quotes:{quote_id}","quote"):
+        return jsonify({"error": "Citation non trouvée"}), 404
+
+    redis_client.hdel(f"quotes:{quote_id}","quote")
+    return jsonify({"message": "Citation supprimée"}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=APP_PORT)
