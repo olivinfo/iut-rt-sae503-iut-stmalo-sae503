@@ -1,23 +1,19 @@
+import os
 import csv
 from flask import Flask, request, jsonify
 from redis import Redis
 from flasgger import Swagger
 from functools import wraps
 
-# Configuration des variables d'environnement
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_DB = int(os.getenv("REDIS_DB", 0))
-APP_PORT = int(os.getenv("APP_PORT", 5000))
+APP_PORT = int(os.getenv("APP_PORT", 5001))
 ADMIN_KEY = os.getenv("ADMIN_KEY", "default_key")
-CSV_FILE_USERS = os.getenv("CSV_FILE", "initial_data_users.csv")
-CSV_FILE_QUOTES = os.getenv("CSV_FILE", "initial_data_quotes.csv")
+CSV_FILE_QUOTES = os.getenv("CSV_FILE_QUOTES", "initial_data_quotes.csv")
 
-# Initialisation de Flask et Swagger
 app = Flask(__name__)
 swagger = Swagger(app)
-
-# Connexion à Redis
 redis_client = Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
 
 def require_auth(f):
@@ -29,57 +25,42 @@ def require_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-# Chargement initial des données
-if not redis_client.exists("users"):
-    if os.path.exists(CSV_FILE_USERS):
-        with open(CSV_FILE_USERS, mode='r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                id=row['id']
-                name=row['name']
-                password=row['password']
-                redis_client.hset(f"users:{id}", mapping={"id": id,"name": name, "password": password})
-                redis_client.sadd("users",f"users:{id}")
-
+# Chargement initial des données citations
 if not redis_client.exists("quotes:1"):
     if os.path.exists(CSV_FILE_QUOTES):
         with open(CSV_FILE_QUOTES, mode='r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-               quote=row['quote']
+               quote = row['quote']
                quote_id = redis_client.incr("quote_id")
                redis_client.hset(f"quotes:{quote_id}", mapping={"quote": quote})
-               redis_client.sadd("quotes",f"quotes:{quote_id}")
+               redis_client.sadd("quotes", f"quotes:{quote_id}")
 
-# Endpoint: Service de recherche
-@app.route('/search', methods=['GET'])
+@app.route('/quotes', methods=['GET'])
+def get_quotes():
+    quotes = redis_client.smembers("quotes")
+    quote_list = [redis_client.hgetall(q) for q in quotes]
+    return jsonify(quote_list), 200
+
+@app.route('/quotes', methods=['POST'])
 @require_auth
-def search_quotes():
-    """
-    Rechercher des citations par mot-clé
-    ---
-    security:
-      - APIKeyAuth: []
-    parameters:
-      - name: keyword
-        in: query
-        required: true
-        type: string
-    responses:
-      200:
-        description: Liste des citations correspondantes
-    """
-    keyword = request.args.get("keyword")
+def add_quote():
+    data = request.get_json()
+    user_id, quote = data.get("user_id"), data.get("quote")
+    if not user_id or not quote:
+        return jsonify({"error": "user_id et quote sont requis"}), 400
+    quote_id = redis_client.incr("quote_id")
+    redis_client.hset(f"quotes:{quote_id}", mapping={"user_id": user_id, "quote": quote})
+    redis_client.sadd("quotes", f"quotes:{quote_id}")
+    return jsonify({"message": "Citation ajoutée", "id": quote_id}), 201
 
-    if not keyword:
-        return jsonify({"error": "Mot-clé requis"}), 400
+@app.route('/quotes/<int:quote_id>', methods=['DELETE'])
+@require_auth
+def delete_quote(quote_id):
+    if not redis_client.hexists(f"quotes:{quote_id}","quote"):
+        return jsonify({"error": "Citation non trouvée"}), 404
+    redis_client.hdel(f"quotes:{quote_id}","quote")
+    return jsonify({"message": "Citation supprimée"}), 200
 
-    members = redis_client.smembers("quotes")
-    filtered_quotes = []
-    for member in members:
-        quote_object = redis_client.hgetall(member)
-        quote = quote_object.get("quote","")
-        if keyword.lower() in quote.lower():
-            filtered_quotes.append(quote)
-    return jsonify(filtered_quotes), 200
-  
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=APP_PORT)
