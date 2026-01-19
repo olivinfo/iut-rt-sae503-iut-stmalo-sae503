@@ -5,7 +5,8 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY search/ ./search/
+COPY data/ ./data/
 
 EXPOSE 5000
-CMD ["python", "search.py"]
+CMD ["python", "search/search.py"]
