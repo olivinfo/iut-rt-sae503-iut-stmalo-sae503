@@ -42,16 +42,6 @@ if not redis_client.exists("users"):
                 redis_client.hset(f"users:{id}", mapping={"id": id,"name": name, "password": password})
                 redis_client.sadd("users",f"users:{id}")
 
-if not redis_client.exists("quotes:1"):
-    if os.path.exists(CSV_FILE_QUOTES):
-        with open(CSV_FILE_QUOTES, mode='r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-               quote=row['quote']
-               quote_id = redis_client.incr("quote_id")
-               redis_client.hset(f"quotes:{quote_id}", mapping={"quote": quote})
-               redis_client.sadd("quotes",f"quotes:{quote_id}")
-
 @app.route('/', methods=['GET'])
 def hello_world():
     return jsonify({"message": "Hello World!"})
