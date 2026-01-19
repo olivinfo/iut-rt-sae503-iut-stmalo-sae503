@@ -113,23 +113,5 @@ def add_user():
     redis_client.sadd("users",f"users:{user_id}")
     return jsonify({"message": "Utilisateur ajouté"}), 201
 
-# Endpoint: Service des citations
-@app.route('/quotes', methods=['GET'])
-def get_quotes():
-    """
-    Récupérer toutes les citations
-    ---
-    security:
-      - APIKeyAuth: []
-    responses:
-      200:
-        description: Liste des citations
-    """
-    quotes = redis_client.smembers("quotes")
-    quote_list=[]
-    for quote in quotes:
-        quote_list.append(redis_client.hgetall(quote))
-    return jsonify(quote_list), 200
-  
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
