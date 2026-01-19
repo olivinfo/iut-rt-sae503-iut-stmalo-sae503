@@ -5,7 +5,6 @@ from redis import Redis
 from flasgger import Swagger
 from functools import wraps
 
-# Configuration
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_DB = int(os.getenv("REDIS_DB", 0))
@@ -26,7 +25,6 @@ def require_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-# Chargement initial
 if not redis_client.exists("quotes:1"):
     if os.path.exists(CSV_FILE_QUOTES):
         with open(CSV_FILE_QUOTES, mode='r', encoding='utf-8') as file:
@@ -48,7 +46,6 @@ def add_quote():
         return jsonify({"error": "user_id et quote sont requis"}), 400
 
     quote_id = redis_client.incr("quote_id")
-    # CORRECTION : On utilise la même structure que le CSV pour que le SEARCH fonctionne
     key = f"quotes:{quote_id}"
     redis_client.hset(key, mapping={"user_id": user_id, "quote": quote})
     redis_client.sadd("quotes", key)
@@ -62,7 +59,6 @@ def delete_quote(quote_id):
     if not redis_client.hexists(key, "quote"):
         return jsonify({"error": "Citation non trouvée"}), 404
 
-    # CORRECTION : On supprime la clé et on la retire du set pour nettoyer le SEARCH
     redis_client.delete(key)
     redis_client.srem("quotes", key)
     return jsonify({"message": "Citation supprimée"}), 200
