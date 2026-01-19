@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: citations_haddock.Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - APP_PORT=5000
+      - ADMIN_KEY=default_key
+      - CSV_FILE_USERS=initial_data_users.csv
+      - CSV_FILE_QUOTES=initial_data_quotes.csv
+
+  redis:
+    image: redis:8
+    ports:
+      - "6379:6379"

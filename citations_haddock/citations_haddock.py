@@ -52,6 +52,10 @@ if not redis_client.exists("quotes:1"):
                redis_client.hset(f"quotes:{quote_id}", mapping={"quote": quote})
                redis_client.sadd("quotes",f"quotes:{quote_id}")
 
+@app.route('/', methods=['GET'])
+def hello_world():
+    return jsonify({"message": "Hello World!"})
+
 # Endpoint: Service des utilisateurs
 @app.route('/users', methods=['GET'])
 @require_auth
