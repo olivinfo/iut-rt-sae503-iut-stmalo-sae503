@@ -18,7 +18,7 @@ labels:
       component: ingress-controller
 
 # Namespace par défaut
-namespace: default
+namespace: haddock
 
 
 

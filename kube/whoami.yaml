@@ -1,4 +1,3 @@
-# whoami.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,5 +15,12 @@ spec:
       containers:
       - name: whoami
         image: traefik/whoami
+        resources:
+          limits:
+            cpu: "1"
+            memory: "500M"
+          requests:
+            cpu: "500m"
+            memory: "250M"
         ports:
         - containerPort: 80

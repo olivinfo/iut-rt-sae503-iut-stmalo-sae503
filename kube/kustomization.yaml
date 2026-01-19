@@ -9,6 +9,7 @@ resources:
 - traefik/ # Déploiement Traefik
 - whoami.yaml
 - whoami-service.yaml
+- whoami-ingress.yaml
 
 # Configuration commune pour toutes les ressources
 labels:
@@ -16,7 +17,7 @@ labels:
     app.kubernetes.io/part-of: sae503-kc-md
 
 # Namespace par défaut
-namespace: default
+namespace: haddock
 
 # Configuration pour les images (si besoin de personnalisation)
 # images:

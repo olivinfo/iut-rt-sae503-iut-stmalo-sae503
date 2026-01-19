@@ -25,7 +25,19 @@ if ! kubectl kustomize . &> /dev/null; then
     exit 1
 fi
 
-echo "Déploiement de toutes les ressources..."
+
+if ! kubectl get namespace haddock &> /dev/null; then
+    echo "Création du namespace haddock..."
+    kubectl create namespace haddock
+    if [ $? -ne 0 ]; then
+        echo "Erreur: Impossible de créer le namespace haddock."
+        exit 1
+    fi
+else
+    echo "Namespace haddock existe déjà et est prêt."
+fi
+
+echo "Déploiement de toutes les ressources dans le namespace haddock..."
 
 # Appliquer la configuration Kustomize principale
 kubectl apply -k .
@@ -53,6 +65,6 @@ echo "Ressources créées:"
 kubectl get all --show-labels
 
 # Afficher la configuration Kustomize finale
-echo ""
-echo "Configuration Kustomize appliquée:"
-kubectl kustomize .
+# echo ""
+# echo "Configuration Kustomize appliquée:"
+# kubectl kustomize .

@@ -17,8 +17,20 @@ kubectl delete -k .
 echo "Attente que les ressources soient supprimées..."
 sleep 10
 
+# Supprimer le namespace haddock (optionnel)
+read -p "Voulez-vous aussi supprimer le namespace haddock ? (y/n) " -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo ""
+    echo "Suppression du namespace haddock..."
+    kubectl delete namespace haddock
+    echo "Namespace haddock supprimé."
+else
+    echo ""
+    echo "Namespace haddock conservé."
+fi
+
 # Vérifier que tout a été supprimé
-echo "Ressources restantes:"
-kubectl get all
+echo "Ressources restantes dans le namespace haddock:"
+kubectl get all -n haddock
 
 echo "Nettoyage terminé!"

@@ -61,6 +61,7 @@ kubectl apply -f traefik-service.yaml
 - **Tableau de bord Traefik**: http://localhost:8080
 - **Service Traefik (HTTP)**: http://localhost:80
 - **Service Traefik (HTTPS)**: https://localhost:443
+- **Namespace**: haddock
 
 ## Configuration
 
