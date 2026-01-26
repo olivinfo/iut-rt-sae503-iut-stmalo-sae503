@@ -3,7 +3,7 @@ import csv
 from flask import Flask, request, jsonify
 from redis import Redis
 from flasgger import Swagger
-#from functools import wraps
+from functools import wraps
 
 # Configuration des variables d'environnement
 REDIS_HOST = "redis"
