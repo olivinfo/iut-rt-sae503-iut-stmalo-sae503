@@ -1,6 +1,9 @@
 services:
   users:
-    image: kitami1/sae503-users:1.0.0
+    # image: kitami1/sae503-users:1.0.0
+    build:
+      context: citations_haddock
+      dockerfile: users/Dockerfile
     ports:
       - "5000:5000"
     depends_on:
@@ -14,7 +17,10 @@ services:
       - CSV_FILE_USERS=/citations_haddock/data/initial_data_users.csv
       - CSV_FILE_QUOTES=/citations_haddock/data/initial_data_quotes.csv
   quotes:
-    image: kitami1/sae503-quotes:1.0.0
+    # image: kitami1/sae503-quotes:1.0.0
+    build:
+      context: citations_haddock
+      dockerfile: quotes/Dockerfile
     ports:
       - "5001:5000"
     depends_on:
@@ -28,7 +34,10 @@ services:
       - CSV_FILE_USERS=/citations_haddock/data/initial_data_users.csv
       - CSV_FILE_QUOTES=/citations_haddock/data/initial_data_quotes.csv
   search:
-    image: kitami1/sae503-search:1.0.0
+    # image: kitami1/sae503-search:1.0.0
+    build:
+      context: citations_haddock
+      dockerfile: search/Dockerfile
     ports:
       - "5002:5000"
     depends_on:

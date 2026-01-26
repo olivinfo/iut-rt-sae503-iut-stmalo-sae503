@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from search_service import app as flask_app
+from search import app as flask_app
 
 @pytest.fixture
 def client():
@@ -22,7 +22,7 @@ def test_search_unauthorized(client):
 
 def test_search_quotes_success(client):
     """Teste une recherche réussie avec Mock de Redis"""
-    with patch('search_service.redis_client') as mock_redis:
+    with patch('search.redis_client') as mock_redis:
         # Simulation des données dans Redis
         mock_redis.smembers.return_value = {"quotes:1", "quotes:2"}
         
@@ -40,7 +40,7 @@ def test_search_quotes_success(client):
 
 def test_search_quotes_no_results(client):
     """Teste une recherche qui ne trouve rien"""
-    with patch('search_service.redis_client') as mock_redis:
+    with patch('search.redis_client') as mock_redis:
         mock_redis.smembers.return_value = {"quotes:1"}
         mock_redis.hgetall.return_value = {"quote": "Mille sabords !"}
 

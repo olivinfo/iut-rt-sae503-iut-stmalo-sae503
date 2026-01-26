@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from user_service import app as flask_app  # Assurez-vous que le fichier se nomme user_service.py
+from users import app as flask_app  # Assurez-vous que le fichier se nomme users.py
 
 @pytest.fixture
 def client():
@@ -22,7 +22,7 @@ def test_get_users_unauthorized(client):
 
 def test_get_users_success(client):
     """Vérifie la récupération de la liste des utilisateurs"""
-    with patch('user_service.redis_client') as mock_redis:
+    with patch('users.redis_client') as mock_redis:
         # On simule la présence de deux clés d'utilisateurs
         mock_redis.smembers.return_value = {"users:1", "users:2"}
         # On simule le contenu de chaque utilisateur
@@ -39,7 +39,7 @@ def test_get_users_success(client):
 
 def test_add_user_success(client):
     """Vérifie l'ajout d'un nouvel utilisateur"""
-    with patch('user_service.redis_client') as mock_redis:
+    with patch('users.redis_client') as mock_redis:
         new_user = {"id": "3", "name": "Tournesol", "password": "pendule"}
         
         response = client.post('/users', 
