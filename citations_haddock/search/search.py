@@ -4,7 +4,7 @@ from redis import Redis
 from flasgger import Swagger
 from functools import wraps
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_HOST = os.getenv("REDIS_HOST", "backend-redis")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 APP_PORT = int(os.getenv("APP_PORT", 5002))
 ADMIN_KEY = os.getenv("ADMIN_KEY", "default_key")
@@ -39,3 +39,4 @@ def search_quotes():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=APP_PORT)
+
