@@ -1,0 +1,199 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: haddock
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  namespace: haddock
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:8
+        ports:
+        - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-redis
+  namespace: haddock
+spec:
+  selector:
+    app: redis 
+  ports:
+  - port: 6379
+    targetPort: 6379
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-users
+  namespace: haddock
+spec:
+  selector:
+    app: users-service
+  ports:
+  - port: 80
+    targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-search
+  namespace: haddock
+spec:
+  selector:
+    app: search-service
+  ports:
+  - port: 80
+    targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-quotes
+  namespace: haddock
+spec:
+  selector:
+    app: quotes-service
+  ports:
+  - port: 80
+    targetPort: 5000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-service
+  namespace: haddock
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: users-service
+  template:
+    metadata:
+      labels:
+        app: users-service
+    spec:
+      containers:
+      - name: users-service
+        image: kitami1/sae503-users:1.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: REDIS_HOST
+          value: "backend-redis" 
+        - name: APP_PORT
+          value: "5000"
+        - name: ADMIN_KEY
+          value: '["default_key"]' 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service
+  namespace: haddock
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: search-service
+  template:
+    metadata:
+      labels:
+        app: search-service
+    spec:
+      containers:
+      - name: search-service
+        image: kitami1/sae503-search:1.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: REDIS_HOST
+          value: "backend-redis"
+        - name: APP_PORT
+          value: "5000"
+        - name: ADMIN_KEY
+          value: '["default_key"]'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quotes-service
+  namespace: haddock
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quotes-service
+  template:
+    metadata:
+      labels:
+        app: quotes-service
+    spec:
+      containers:
+      - name: quotes-service
+        image: kitami1/sae503-quotes:1.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: REDIS_HOST
+          value: "backend-redis"
+        - name: APP_PORT
+          value: "5000"
+        - name: ADMIN_KEY
+          value: '["default_key"]'
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reverse-proxy
+  namespace: haddock
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+  - host: localhost.local
+    http:
+      paths:
+      - path: /users
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-users
+            port:
+              number: 80
+      - path: /quotes
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-quotes
+            port:
+              number: 80
+      - path: /search
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-search
+            port:
+              number: 80
