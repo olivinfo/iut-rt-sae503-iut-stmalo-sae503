@@ -1,4 +1,0 @@
-flask
-redis
-flasgger
-functools

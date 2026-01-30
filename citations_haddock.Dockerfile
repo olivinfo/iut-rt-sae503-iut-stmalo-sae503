@@ -1,5 +1,5 @@
 # Utilisation d'une image Python officielle
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # Définition du répertoire de travail
 WORKDIR /app
@@ -16,13 +16,13 @@ COPY ./data/ .
 COPY ./citations_haddock/ .
 
 # Définition des variables d'environnement
-ENV REDIS_HOST=redis \
-    REDIS_PORT=6379 \
-    REDIS_DB=0 \
-    APP_PORT=5000 \
-    ADMIN_KEY=default_key \
-    CSV_FILE_USERS=initial_data_users.csv \
-    CSV_FILE_QUOTES=initial_data_quotes.csv
+ENV REDIS_HOST=redis
+ENV REDIS_PORT=6379
+ENV REDIS_DB=0
+ENV APP_PORT=5000
+ENV ADMIN_KEY="default_key"
+ENV CSV_FILE_USERS="initial_data_users.csv"
+ENV CSV_FILE_QUOTES="initial_data_quotes.csv"
 
 # Exposition du port de l'application
 EXPOSE 5000

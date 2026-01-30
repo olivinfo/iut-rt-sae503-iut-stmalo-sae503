@@ -1,0 +1,33 @@
+# kustomization.yaml
+# Configuration Kustomize pour déployer Traefik
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Liste des ressources à déployer dans l'ordre
+resources:
+  - traefik-rbac.yaml
+  - traefik-config.yaml
+  - traefik-deployment.yaml
+  - traefik-service.yaml
+
+# Configuration commune pour toutes les ressources
+labels:
+  - pairs:
+      app: traefik
+      component: ingress-controller
+
+# Namespace par défaut
+namespace: haddock
+
+
+
+# Variables pour personnalisation (optionnel)
+# vars:
+#   - name: TRAEFIK_IMAGE
+#     objref:
+#       kind: Deployment
+#       name: traefik
+#       apiVersion: apps/v1
+#     fieldref:
+#       fieldpath: spec.template.spec.containers[0].image

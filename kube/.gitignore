@@ -1,0 +1,43 @@
+# .gitignore
+# Fichiers à ignorer pour le projet Kubernetes
+
+# Fichiers temporaires
+*.tmp
+*.swp
+*.swo
+
+# Fichiers de cache
+.cache/
+
+# Fichiers générés par Kustomize
+.kustomize/
+
+# Fichiers de logs
+*.log
+
+# Fichiers de configuration locale
+*.local
+
+# Fichiers de backup
+*~
+*.bak
+
+# Fichiers de système
+.DS_Store
+Thumbs.db
+
+# Dossiers de build
+dist/
+build/
+
+# Fichiers de secrets (ne devraient pas être dans le repo de toute façon)
+secrets/
+*.secret
+
+# Fichiers de configuration IDE
+.idea/
+.vscode/
+
+# Fichiers de dépendances
+vendor/
+node_modules/
