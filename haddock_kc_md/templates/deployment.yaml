@@ -52,6 +52,8 @@ spec:
       labels:
         app: users-pod
     spec:
+      imagePullSecrets:
+        - name: regcred
       containers:
       - name: users-service
         image: "{{ .Values.registry }}/{{ .Values.services.users.name }}:{{ .Values.imageTag }}"
@@ -73,7 +75,7 @@ spec:
   selector:
     app: users-pod
   ports:
-  - port: {{ .Values.ingress.externalPort }}
+  - port: {{ .Values.services.users.port }}
     targetPort: 5000
 
 ---
@@ -92,6 +94,8 @@ spec:
       labels:
         app: search-pod
     spec:
+      imagePullSecrets:
+        - name: regcred
       containers:
       - name: search-service
         image: "{{ .Values.registry }}/{{ .Values.services.search.name }}:{{ .Values.imageTag }}"
@@ -111,7 +115,7 @@ spec:
   selector:
     app: search-pod
   ports:
-  - port: {{ .Values.ingress.externalPort }}
+  - port: {{ .Values.services.search.port }}
     targetPort: 5000
 
 ---
@@ -130,6 +134,8 @@ spec:
       labels:
         app: quotes-pod
     spec:
+      imagePullSecrets:    
+        - name: regcred
       containers:
       - name: quotes-service
         image: "{{ .Values.registry }}/{{ .Values.services.quotes.name }}:{{ .Values.imageTag }}"
@@ -149,7 +155,7 @@ spec:
   selector:
     app: quotes-pod
   ports:
-  - port: {{ .Values.ingress.externalPort }}
+  - port: {{ .Values.services.quotes.port }}
     targetPort: 5000
 
 ---

@@ -7,12 +7,16 @@ services:
   users:
     name: kc-md-haddock-users    
     serviceName: backend-users   
+    port: 80
   search:
     name: kc-md-haddock-search   
     serviceName: backend-search
+    port: 80
+
   quotes:
     name: kc-md-haddock-quotes   
     serviceName: backend-quotes
+    port: 80
 
 redis:
   image: redis:8
