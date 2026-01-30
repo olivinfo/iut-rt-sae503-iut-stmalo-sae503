@@ -103,7 +103,10 @@ spec:
         - name: APP_PORT
           value: "5000"
         - name: ADMIN_KEY
-          value: '["default_key"]' 
+          valueFrom:
+            secretKeyRef:
+              name: apps-secrets
+              key: ADMIN_KEY
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -132,7 +135,10 @@ spec:
         - name: APP_PORT
           value: "5000"
         - name: ADMIN_KEY
-          value: '["default_key"]'
+          valueFrom:
+            secretKeyRef:
+              name: apps-secrets
+              key: ADMIN_KEY
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -161,8 +167,10 @@ spec:
         - name: APP_PORT
           value: "5000"
         - name: ADMIN_KEY
-          value: '["default_key"]'
-
+          valueFrom:
+            secretKeyRef:
+              name: apps-secrets
+              key: ADMIN_KEY
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
