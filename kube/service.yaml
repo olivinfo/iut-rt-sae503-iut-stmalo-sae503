@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: haddock
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-search
+spec:
+  selector:
+    app: search-service
+  ports:
+  - port: 80
+    targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-users
+spec:
+  selector:
+    app: users-service
+  ports:
+  - port: 80
+    targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-quotes
+spec:
+  selector:
+    app: quotes-service
+  ports:
+  - port: 80
+    targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-redis
+spec:
+  selector:
+    app: redis-service
+  ports:
+  - port: 6379
+    targetPort: 6379

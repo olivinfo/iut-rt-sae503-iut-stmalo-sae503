@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: haddock
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-service
+  namespace: haddock
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: users-service
+  template:
+    metadata:
+      labels:
+        app: users-service
+    spec:
+      containers:
+      - name: users-service
+        image: kitami1/sae503-users:1.0.0
+        imagePullPolicy: Always
+        env:
+        - name: REDIS_HOST
+          value: "backend-redis.haddock.svc.cluster.local"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service
+  namespace: haddock
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: search-service
+  template:
+    metadata:
+      labels:
+        app: search-service
+    spec:
+      containers:
+      - name: search-service
+        image: kitami1/sae503-search:1.0.0
+        imagePullPolicy: Always 
+        env:
+        - name: REDIS_HOST
+          value: "backend-redis.haddock.svc.cluster.local"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quotes-service
+  namespace: haddock
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quotes-service
+  template:
+    metadata:
+      labels:
+        app: quotes-service
+    spec:
+      containers:
+      - name: quotes-service
+        image: kitami1/sae503-quotes:1.0.0
+        imagePullPolicy: Always
+        env:
+        - name: REDIS_HOST
+          value: "backend-redis.haddock.svc.cluster.local"
+
