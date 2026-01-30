@@ -13,7 +13,7 @@ ADMIN_KEY = os.getenv("ADMIN_KEY", "default_key")
 
 redis_client = Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
 
-def authentification(f):
+def require_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth_key = request.headers.get("Authorization")
@@ -23,7 +23,7 @@ def authentification(f):
     return decorated
 
 @app.route('/search', methods=['GET'])
-@authentification
+@require_auth
 def search_quotes():
     keyword = request.args.get("keyword", "").lower()
     if not keyword: return jsonify({"error": "Mot-clé requis"}), 400

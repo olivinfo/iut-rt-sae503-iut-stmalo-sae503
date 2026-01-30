@@ -14,7 +14,7 @@ CSV_FILE_USERS = "initial_data_users.csv"
 
 redis_client = Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
 
-def authentification(f):
+def require_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth_key = request.headers.get("Authorization")
@@ -23,7 +23,7 @@ def authentification(f):
         return f(*args, **kwargs)
     return decorated
 
-@app.avant_premiere_requete
+@app.before_first_request
 def chargement_de_donnees():
     if not redis_client.exists("users"):
         if os.path.exists(CSV_FILE_USERS):
@@ -34,13 +34,13 @@ def chargement_de_donnees():
                     redis_client.sadd("users", f"users:{row['id']}")
 
 @app.route('/users', methods=['GET'])
-@authentification
+@require_auth
 def get_users():
     users = [redis_client.hgetall(uid) for uid in redis_client.smembers("users")]
     return jsonify(users), 200
 
 @app.route('/users', methods=['POST'])
-@authentification
+@require_auth
 def add_user():
     data = request.get_json()
     uid = data.get("id")

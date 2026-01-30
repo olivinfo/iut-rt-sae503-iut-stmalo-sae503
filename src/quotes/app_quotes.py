@@ -14,7 +14,7 @@ CSV_FILE_QUOTES = "initial_data_quotes.csv"
 
 redis_client = Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
 
-def authentification(f):
+def require_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth_key = request.headers.get("Authorization")
@@ -23,7 +23,7 @@ def authentification(f):
         return f(*args, **kwargs)
     return decorated
 
-@app.avant_premiere_requete
+@app.before_first_request
 def chargement_de_donnees():
     if not redis_client.exists("quotes"):
         if os.path.exists(CSV_FILE_QUOTES):
@@ -40,7 +40,7 @@ def get_quotes():
     return jsonify(quotes), 200
 
 @app.route('/quotes', methods=['POST'])
-@authentification
+@require_auth
 def add_quote():
     data = request.get_json()
     qid = redis_client.incr("quote_id")
@@ -49,7 +49,7 @@ def add_quote():
     return jsonify({"message": "Citation ajoutée", "id": qid}), 201
 
 @app.route('/quotes/<int:quote_id>', methods=['DELETE'])
-@authentification
+@require_auth
 def delete_quote(quote_id):
     if redis_client.exists(f"quotes:{quote_id}"):
         redis_client.delete(f"quotes:{quote_id}")
