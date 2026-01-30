@@ -7,7 +7,6 @@ from flasgger import Swagger
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 APP_PORT = int(os.getenv("APP_PORT", "5000"))
-ADMIN_KEY = os.getenv("ADMIN_KEY", "default_key")
 
 app = Flask(__name__)
 swagger = Swagger(app)
@@ -38,6 +37,11 @@ def require_auth(f):
         # Si tout est valide, exécute la fonction décorée
         return f(*args, **kwargs)
     return decorated
+
+@app.route('/search/health')
+def helloworld():
+
+    return jsonify({"message": "healthy"}), 200
 
 @app.route('/search', methods=['GET'])
 @require_auth

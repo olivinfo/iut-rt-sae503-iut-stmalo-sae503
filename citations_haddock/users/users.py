@@ -75,6 +75,11 @@ if not redis_client.exists("token"):
 def hello_world():
     return jsonify({"message": "User Service Online"})
 
+@app.route('/users/health')
+def helloworld():
+
+    return jsonify({"message": "healthy"}), 200
+
 @app.route('/users', methods=['GET'])
 @require_auth
 def get_users():
