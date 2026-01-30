@@ -15,7 +15,6 @@ REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 REDIS_DB = int(os.getenv("REDIS_DB", "0"))
 APP_PORT = int(os.getenv("APP_PORT", "5000"))
-ADMIN_KEY = os.getenv("ADMIN_KEY", "default_key")
 CSV_FILE_QUOTES = os.getenv("CSV_FILE_QUOTES", "initial_data_quotes.csv")
 
 app = Flask(__name__)
@@ -62,10 +61,10 @@ if not redis_client.exists("quotes:1"):
         print("/!\\ Pas de CSV trouver pour les citations /!\\")
 
 
-# @app.route('/')
-# def helloworld():
+@app.route('/quotes/health')
+def helloworld():
 
-#     return jsonify({"message": "Hello World"}), 200
+    return jsonify({"message": "healthy"}), 200
 
 # Endpoint: Service des citations
 @app.route('/quotes', methods=['GET'])
