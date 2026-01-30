@@ -5,11 +5,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY quotes/ ./quotes/
-COPY data/ ./data/
+COPY quotes/ .
+COPY data/ .
 
 ENV REDIS_HOST="backend-redis"
 
 EXPOSE 5000
 
-CMD ["python", "quotes/quotes.py"]
+CMD ["python", "quotes.py"]
