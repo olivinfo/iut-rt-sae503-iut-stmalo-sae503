@@ -5,9 +5,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY users/ ./users/
-COPY data/ ./data/
+COPY users/ .
+COPY data/ .
 
 EXPOSE 5000
 
-CMD ["python", "users/users.py"]
+CMD ["python", "users.py"]

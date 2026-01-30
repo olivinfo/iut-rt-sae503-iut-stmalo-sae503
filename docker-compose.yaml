@@ -1,53 +1,111 @@
 services:
+  traefik:
+    image: "traefik"
+    container_name: "traefik"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    command:
+      - "--providers.docker=true"
+      - "--api.insecure=true"  # Active le dashboard (optionnel)
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=proxy"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.haddock.address=:5000"
+    ports:
+      - "80:80"
+      - "5000:5000"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
   users:
     # image: kitami1/sae503-users:1.0.0
     build:
       context: citations_haddock
       dockerfile: users/Dockerfile
-    ports:
-      - "5000:5000"
+    # ports:
+    #   - "5000:5000"
+    networks:
+      - proxy
     depends_on:
       - redis
+      - traefik
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
       - APP_PORT=5000
-      - ADMIN_KEY=default_key
+      - ADMIN_KEY=["default_key"]
       # - CSV_FILE_USERS=/citations_haddock/data/initial_data_users.csv
       # - CSV_FILE_QUOTES=/citations_haddock/data/initial_data_quotes.csv
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.users.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.users.entrypoints=haddock"
+      - "traefik.http.services.users.loadbalancer.server.port=5000"  # Port de votre app Flask
+
+
   quotes:
     # image: kitami1/sae503-quotes:1.0.0
     build:
       context: citations_haddock
       dockerfile: quotes/Dockerfile
-    ports:
-      - "5001:5000"
+    # ports:
+    #   - "5001:5000"
+    networks:
+      - proxy
     depends_on:
       - redis
+      - traefik
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
       - APP_PORT=5000
       - ADMIN_KEY=default_key
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.quotes.rule=PathPrefix(`/quotes`)"
+      - "traefik.http.routers.quotes.entrypoints=haddock"
+      - "traefik.http.services.quotes.loadbalancer.server.port=5000"  # Port de votre app Flask
+
+
   search:
     # image: kitami1/sae503-search:1.0.0
     build:
       context: citations_haddock
       dockerfile: search/Dockerfile
-    ports:
-      - "5002:5000"
+    # ports:
+    #   - "5002:5000"
+    networks:
+      - proxy
     depends_on:
       - redis
+      - traefik
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
       - APP_PORT=5000
       - ADMIN_KEY=default_key
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.search.rule=PathPrefix(`/search`)"
+      - "traefik.http.routers.search.entrypoints=haddock"
+      - "traefik.http.services.search.loadbalancer.server.port=5000"  # Port de votre app Flask
 
   redis:
     image: redis:8
     ports:
       - "6379:6379"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    name: proxy
+
+

@@ -3,8 +3,8 @@
 
 all:
 	@echo "Tout les tests"
-	make build
-	make test
+	@make build
+	@make test
 
 help:
 	@echo ""
@@ -32,7 +32,16 @@ install:
 
 build:
 	@echo "Construction et lancement des conteneurs Docker..."
+	clear
+	docker compose down
 	docker compose up --build
+
+# Nettoyer l'environnement
+clean:
+	@echo "Nettoyage de l'environnement..."
+	$(DOCKER_COMPOSE) down --volumes --rmi all
+	docker system prune -a -f
+	@echo "Environnement nettoyé"
 
 test:
 	@echo "Tester tout les tests"
@@ -62,7 +71,3 @@ logs:
 lint:
 	@echo "Analyse du code python"
 	pylint --rcfile=.pylintrc .
-
-
-
-

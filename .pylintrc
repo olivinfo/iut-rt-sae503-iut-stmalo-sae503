@@ -451,7 +451,10 @@ disable=raw-checker-failed,
         missing-class-docstring,
         missing-function-docstring,
         too-few-public-methods,
-        W1203
+        W1203,
+        redefined-outer-name,
+        broad-exception-caught,
+        R0801
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
