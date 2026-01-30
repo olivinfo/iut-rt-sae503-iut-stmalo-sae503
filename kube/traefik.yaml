@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reverse-proxy
+  namespace: haddock
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+  - host: localhost.local
+    http:
+      paths:
+
+      - path: /users
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-users 
+            port:
+              number: 5000    
+
+      - path: /quotes
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-quotes
+            port:
+              number: 5001
+
+      - path: /search
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-search
+            port:
+              number: 5002
