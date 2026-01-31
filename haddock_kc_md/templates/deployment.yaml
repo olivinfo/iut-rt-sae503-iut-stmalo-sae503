@@ -62,7 +62,10 @@ spec:
           - name: REDIS_HOST
             value: {{ .Values.redis.host | quote }}
           - name: ADMIN_KEY
-            value: {{ .Values.adminKey | default "default_key" | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: apps-secrets
+                key: ADMIN_KEY
 ---
 apiVersion: v1
 kind: Service
@@ -102,7 +105,10 @@ spec:
           - name: REDIS_HOST
             value: {{ .Values.redis.host | quote }}
           - name: ADMIN_KEY
-            value: {{ .Values.adminKey | default "default_key" | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: apps-secrets
+                key: ADMIN_KEY
 ---
 apiVersion: v1
 kind: Service
@@ -142,7 +148,10 @@ spec:
           - name: REDIS_HOST
             value: {{ .Values.redis.host | quote }}
           - name: ADMIN_KEY
-            value: {{ .Values.adminKey | default "default_key" | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: apps-secrets
+                key: ADMIN_KEY
 ---
 apiVersion: v1
 kind: Service
