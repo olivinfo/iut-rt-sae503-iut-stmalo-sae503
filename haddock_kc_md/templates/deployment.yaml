@@ -180,6 +180,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ .Values.namespace }}-rate-limit@kubernetescrd"
 spec:
   rules:
   - host: {{ .Values.ingress.host }}
