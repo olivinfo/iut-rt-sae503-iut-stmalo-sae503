@@ -1,0 +1,28 @@
+  namespace: haddock
+  replicaCount: 2
+  imageTag: "1.0.0"
+  registry: kitami1
+
+  services:
+    users:
+      name: kc-md-haddock-users    
+      serviceName: backend-users   
+
+    search:
+      name: kc-md-haddock-search   
+      serviceName: backend-search
+
+    quotes:
+      name: kc-md-haddock-quotes   
+      serviceName: backend-quotes
+
+  redis:
+    image: redis:8
+    host: backend-redis
+    port: 6379
+
+  ingress:
+    name: reverse-proxy-haddock
+    host: localhost.local
+
+  adminKey: '["default_key"]'

@@ -1,0 +1,4 @@
+pytest
+make
+redis
+requests
