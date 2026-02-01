@@ -192,18 +192,18 @@ spec:
           service:
             name: {{ .Values.services.users.serviceName }}
             port:
-              number: 80
+              number: 81
       - path: /quotes
         pathType: Prefix
         backend:
           service:
             name: {{ .Values.services.quotes.serviceName }}
             port:
-              number: 80
+              number: 81
       - path: /search
         pathType: Prefix
         backend:
           service:
             name: {{ .Values.services.search.serviceName }}
             port:
-              number: 80
+              number: 81
