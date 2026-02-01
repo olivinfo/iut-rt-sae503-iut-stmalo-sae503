@@ -2,6 +2,7 @@ import os
 import csv
 from functools import wraps
 import json
+import secrets
 from flask import Flask, request, jsonify
 from redis import Redis
 from flasgger import Swagger
@@ -109,6 +110,36 @@ def get_all_tokens():
         users.append(user_data)
     return jsonify(users), 200
 
+@app.route('/users/login', methods=['POST'])
+def login_user():
+    data = request.get_json()
+    name = data.get("name")
+    password = data.get("password")
+
+    if not name or not password:
+        return jsonify({"error": "Nom et mot de passe sont requis"}), 400
+
+    user_keys = redis_client.smembers("users")
+    for user_key in user_keys:
+        user_data = redis_client.hgetall(user_key)
+        if user_data.get("name") == name and user_data.get("password") == password:
+            token = secrets.token_hex(16)
+
+            redis_client.hset(
+                f"token:{token}",
+                mapping={
+                    "id": user_data.get("id"),
+                    "name": user_data.get("name"),
+                }
+            )
+            redis_client.sadd("token", f"token:{token}")
+
+            return jsonify({
+                "token": token,
+                "user_id": user_data.get("id")
+            }), 200
+
+    return jsonify({"error": "Nom d'utilisateur ou mot de passe incorrect"}), 401
 
 
 @app.route('/users', methods=['POST'])

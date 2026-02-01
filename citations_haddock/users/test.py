@@ -114,3 +114,60 @@ def test_authentication_header_format(client):
     # Test avec la clé directement (devrait fonctionner)
     response = client.get('/users', headers={'Authorization': 'default_key'})
     assert response.status_code == 200
+
+def test_user_login_success(client):
+    """Teste la connexion réussie d'un utilisateur"""
+    with patch('users.redis_client') as mock_redis:
+        # Simuler la présence de l'utilisateur dans Redis
+        mock_redis.smembers.return_value = {"users:0"}
+        mock_redis.hgetall.return_value = {"id": "0", "name": "Alice", "password": "inWonderland"}
+
+        login_data = {"name": "Alice", "password": "inWonderland"}
+        response = client.post('/users/login', json=login_data)
+
+        assert response.status_code == 200
+        assert "token" in response.json
+        assert "user_id" in response.json
+        assert response.json["user_id"] == "0"
+        # Vérifier que le token a été stocké dans Redis
+        assert mock_redis.hset.called
+        assert mock_redis.sadd.called
+
+def test_user_login_wrong_password(client):
+    """Teste la connexion avec un mot de passe incorrect"""
+    with patch('users.redis_client') as mock_redis:
+        # Simuler la présence de l'utilisateur mais avec un mot de passe différent
+        mock_redis.smembers.return_value = {"users:0"}
+        mock_redis.hgetall.return_value = {"id": "0", "name": "Alice", "password": "inWonderland"}
+
+        login_data = {"name": "Alice", "password": "wrongPassword"}
+        response = client.post('/users/login', json=login_data)
+
+        assert response.status_code == 401
+        assert "error" in response.json
+
+def test_user_login_nonexistent_user(client):
+    """Teste la connexion avec un utilisateur qui n'existe pas"""
+    with patch('users.redis_client') as mock_redis:
+        # Simuler une base vide
+        mock_redis.smembers.return_value = set()
+
+        login_data = {"name": "UnknownUser", "password": "somePassword"}
+        response = client.post('/users/login', json=login_data)
+
+        assert response.status_code == 401
+        assert "error" in response.json
+
+def test_user_login_missing_credentials(client):
+    """Teste la connexion sans nom ou mot de passe"""
+    # Sans nom
+    login_data = {"password": "somePassword"}
+    response = client.post('/users/login', json=login_data)
+    assert response.status_code == 400
+    assert "error" in response.json
+
+    # Sans mot de passe
+    login_data = {"name": "Alice"}
+    response = client.post('/users/login', json=login_data)
+    assert response.status_code == 400
+    assert "error" in response.json

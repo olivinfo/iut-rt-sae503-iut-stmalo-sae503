@@ -81,6 +81,58 @@ def test_get_users_unauthorized():
     assert response.status_code == 401, f"Échec : {response.text}"
     # assert response.json() == {"error": "Unauthorized"}
 
+def test_user_login_success():
+    """Teste la connexion réussie d'un utilisateur."""
+    login_data = {"name": "Alice", "password": "inWonderland"}
+    response = make_request("POST", f"{USERS_URL}/users/login", json=login_data)
+    assert response.status_code == 200, f"Échec : {response.text}"
+    assert "token" in response.json(), "Token non retourné"
+    assert "user_id" in response.json(), "User ID non retourné"
+    assert response.json()["user_id"] == "0", "User ID incorrect"
+
+def test_user_login_wrong_password():
+    """Teste la connexion avec un mot de passe incorrect."""
+    login_data = {"name": "Alice", "password": "wrongPassword"}
+    response = make_request("POST", f"{USERS_URL}/users/login", json=login_data)
+    assert response.status_code == 401, f"Échec : {response.text}"
+    assert "error" in response.json(), "Message d'erreur non retourné"
+
+def test_user_login_nonexistent_user():
+    """Teste la connexion avec un utilisateur qui n'existe pas."""
+    login_data = {"name": "UnknownUser", "password": "somePassword"}
+    response = make_request("POST", f"{USERS_URL}/users/login", json=login_data)
+    assert response.status_code == 401, f"Échec : {response.text}"
+    assert "error" in response.json(), "Message d'erreur non retourné"
+
+def test_user_login_missing_credentials():
+    """Teste la connexion sans nom ou mot de passe."""
+    # Sans nom
+    login_data = {"password": "somePassword"}
+    response = make_request("POST", f"{USERS_URL}/users/login", json=login_data)
+    assert response.status_code == 400, f"Échec : {response.text}"
+    assert "error" in response.json(), "Message d'erreur non retourné"
+
+    # Sans mot de passe
+    login_data = {"name": "Alice"}
+    response = make_request("POST", f"{USERS_URL}/users/login", json=login_data)
+    assert response.status_code == 400, f"Échec : {response.text}"
+    assert "error" in response.json(), "Message d'erreur non retourné"
+
+def test_user_login_and_use_token():
+    """Teste la connexion d'un utilisateur et l'utilisation du token pour des requêtes authentifiées."""
+    # D'abord, connecter l'utilisateur
+    login_data = {"name": "Bob", "password": "squarePants"}
+    login_response = make_request("POST", f"{USERS_URL}/users/login", json=login_data)
+    assert login_response.status_code == 200, f"Échec de connexion : {login_response.text}"
+
+    token = login_response.json()["token"]
+    user_headers = {"Authorization": token}
+
+    # Ensuite, utiliser le token pour accéder à une route protégée
+    response = make_request("GET", f"{USERS_URL}/users", headers=user_headers)
+    assert response.status_code == 200, f"Échec d'accès avec token : {response.text}"
+    assert len(response.json()) >= 1, "Aucun utilisateur trouvé"
+
 def test_add_quote():
     """Teste l'ajout d'une citation."""
     quote_data = {"user_id": "1", "quote": "Citation de test"}
@@ -215,6 +267,11 @@ if __name__ == "__main__":
         test_add_user_missing_id()
         test_get_users()
         test_get_users_unauthorized()
+        test_user_login_success()
+        test_user_login_wrong_password()
+        test_user_login_nonexistent_user()
+        test_user_login_missing_credentials()
+        test_user_login_and_use_token()
 
         # Tests citations
         test_add_quote()

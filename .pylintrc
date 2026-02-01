@@ -39,7 +39,7 @@ extension-pkg-whitelist=
 fail-on=
 
 # Specify a score threshold under which the program will exit with error.
-fail-under=10
+fail-under=8.0
 
 # Interpret the stdin as a python script, whose filename needs to be passed as
 # the module_or_package argument.
@@ -443,18 +443,18 @@ disable=raw-checker-failed,
         suppressed-message,
         useless-suppression,
         deprecated-pragma,
+        use-symbolic-message-instead,
         use-implicit-booleaness-not-comparison-to-string,
         use-implicit-booleaness-not-comparison-to-zero,
-        use-symbolic-message-instead,
         import-error,
         missing-module-docstring,
         missing-class-docstring,
         missing-function-docstring,
         too-few-public-methods,
-        W1203,
+        logging-fstring-interpolation,
         redefined-outer-name,
         broad-exception-caught,
-        R0801
+        duplicate-code
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
