@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quotes-service
+  namespace: haddock-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quotes
+  template:
+    metadata:
+      labels:
+        app: quotes
+    spec:
+      containers:
+      - name: quotes
+        image: rosinante2405/haddock-quotes:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: ADMIN_KEY
+          valueFrom:
+            secretKeyRef:
+              name: haddock-secrets
+              key: admin-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quotes-service
+  namespace: haddock-app
+spec:
+  selector:
+    app: quotes
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
