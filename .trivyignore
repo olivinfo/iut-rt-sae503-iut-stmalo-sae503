@@ -1,0 +1,16 @@
+# .trivyignore
+# This file specifies vulnerabilities or issues to ignore during Trivy scans.
+# Each line should contain a specific CVE ID or issue identifier.
+
+# Example: Ignore a specific CVE
+CVE-2021-1234
+CVE-2022-5678
+
+# Example: Ignore a specific file or directory
+# path/to/file
+# path/to/directory/
+
+# Example: Ignore a specific type of issue
+# AVG-123
+
+# Add your specific CVEs or issues below this line
