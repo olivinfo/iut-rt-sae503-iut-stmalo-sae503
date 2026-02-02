@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service
+  namespace: haddock-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: search
+  template:
+    metadata:
+      labels:
+        app: search
+    spec:
+      containers:
+      - name: search
+        image: rosinante2405/haddock-search:1.0
+        ports:
+        - containerPort: 5000
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: ADMIN_KEY
+          valueFrom:
+            secretKeyRef:
+              name: haddock-secrets
+              key: admin-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-service
+  namespace: haddock-app
+spec:
+  selector:
+    app: search
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000

@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-service
+  namespace: haddock-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+      - name: users
+        image: rosinante2405/haddock-users:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: ADMIN_KEY
+          valueFrom:
+            secretKeyRef:
+              name: haddock-secrets
+              key: admin-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-service
+  namespace: haddock-app
+spec:
+  selector:
+    app: users
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
