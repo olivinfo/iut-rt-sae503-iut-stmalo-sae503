@@ -23,7 +23,6 @@ def require_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-@app.before_first_request
 def chargement_de_donnees():
     if not redis_client.exists("users"):
         if os.path.exists(CSV_FILE_USERS):
@@ -50,4 +49,5 @@ def add_user():
     return jsonify({"message": "Utilisateur ajouté"}), 201
 
 if __name__ == '__main__':
+    chargement_de_donnees()
     app.run(host='0.0.0.0', port=int(os.getenv("APP_PORT", 5000)))

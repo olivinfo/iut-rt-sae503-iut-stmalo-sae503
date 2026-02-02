@@ -23,7 +23,6 @@ def require_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-@app.before_first_request
 def chargement_de_donnees():
     if not redis_client.exists("quotes"):
         if os.path.exists(CSV_FILE_QUOTES):
@@ -58,4 +57,5 @@ def delete_quote(quote_id):
     return jsonify({"error": "Non trouvée"}), 404
 
 if __name__ == '__main__':
+    chargement_de_donnees()
     app.run(host='0.0.0.0', port=int(os.getenv("APP_PORT", 5000)))
